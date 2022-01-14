@@ -1,12 +1,16 @@
 package com.example.instagram.navigation
 
+import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.widget.Toast
 import com.example.instagram.R
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.android.synthetic.main.activity_add_photo.*
+import java.text.SimpleDateFormat
+import java.util.*
 
 class AddPhotoActivity : AppCompatActivity() {
     var PICK_IMAGE_FROM_ALBAM=0
@@ -20,7 +24,31 @@ class AddPhotoActivity : AppCompatActivity() {
         photoPickerIntent.type="image/*"
         startActivityForResult(photoPickerIntent,PICK_IMAGE_FROM_ALBAM)
         addphoto_btn_upload.setOnClickListener{
-
+            contentUpload()
         }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if(requestCode==PICK_IMAGE_FROM_ALBAM){
+            if(resultCode== Activity.RESULT_OK){
+                photoUri=data?.data
+                addphoto_image.setImageURI(photoUri)
+            }else{
+                finish()
+            }
+        }
+    }
+    fun contentUpload(){
+        var timestamp = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
+        var imageFileName = "IMAGE_" + timestamp + "_.png"
+
+        var storageRef = storage?.reference?.child("images")?.child(imageFileName)
+
+        //Promise method
+        storageRef?.putFile(photoUri!!)?.addOnSuccessListener {
+            Toast.makeText(this,getString(R.string.upload_success),Toast.LENGTH_LONG).show()
+        }
+
     }
 }
